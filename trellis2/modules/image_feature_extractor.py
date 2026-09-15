@@ -105,30 +105,52 @@ class DinoV3FeatureExtractor:
     def __call__(self, image: Union[torch.Tensor, List[Image.Image]]) -> torch.Tensor:
         """
         Extract features from the image.
-        
+    
         Args:
-            image: A batch of images as a tensor of shape (B, C, H, W) or a list of PIL images.
-        
+            image: A batch of images as a tensor of shape (B, C, H, W)
+                   or a list of PIL images.
+    
         Returns:
-            A tensor of shape (B, N, D) where N is the number of patches and D is the feature dimension.
+            A tensor of shape (B, N, D) where N is the number of patches
+            and D is the feature dimension.
         """
+    
         if isinstance(image, torch.Tensor):
             assert image.ndim == 4, "Image tensor should be batched (B, C, H, W)"
+    
         elif isinstance(image, list):
-            assert all(isinstance(i, Image.Image) for i in image), "Image list should be list of PIL images"
-            # We resize the images only if they are bigger than self.image_size
-            # image = [
-                # i.resize((self.image_size, self.image_size), Image.LANCZOS) 
-                # if max(i.size) > self.image_size else i 
-                # for i in image
-            # ]            
-            image = [i.resize((self.image_size, self.image_size), Image.LANCZOS) for i in image]
-            image = [np.array(i.convert('RGB')).astype(np.float32) / 255 for i in image]
-            image = [torch.from_numpy(i).permute(2, 0, 1).float() for i in image]
-            image = torch.stack(image).cuda()
+            assert all(
+                isinstance(i, Image.Image) for i in image
+            ), "Image list should be list of PIL images"
+    
+            image = [
+                i.resize((self.image_size, self.image_size), Image.LANCZOS)
+                for i in image
+            ]
+    
+            image = [
+                np.array(i.convert('RGB')).astype(np.float32) / 255
+                for i in image
+            ]
+    
+            image = [
+                torch.from_numpy(i).permute(2, 0, 1).float()
+                for i in image
+            ]
+    
+            image = torch.stack(image)
+    
         else:
             raise ValueError(f"Unsupported type of image: {type(image)}")
-        
-        image = self.transform(image).cuda()
+    
+        # Das Modell kann CPU oder CUDA sein.
+        # Das Bild muss auf dasselbe Device wie die DINOv3-Gewichte.
+        device = self.model.embeddings.patch_embeddings.weight.device
+    
+        image = image.to(device)
+        image = self.transform(image).to(device)
+    
         features = self.extract_features(image)
+    
         return features
+

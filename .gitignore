@@ -10,3 +10,32 @@ o-voxel/*
 nvdiffrast/*
 nvdiffrec/*
 fp8_models/*
+# Python
+*.py[cod]
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Model / weight files
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+*.bin
+
+# Caches
+triton_cache/
+triton_caches/
+
+# Local output
+output/
+outputs/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store

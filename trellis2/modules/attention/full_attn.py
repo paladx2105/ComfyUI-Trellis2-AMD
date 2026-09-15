@@ -166,7 +166,7 @@ def scaled_dot_product_attention(*args, **kwargs):
         out = _naive_sdpa(q, k, v)
 
     elif config.BACKEND == 'aule':
-        from aule import flash_attention_triton
+        from aule.triton_flash_amd import flash_attention_amd
         if num_all_args == 1:
             q, k, v = qkv.unbind(dim=2)
         elif num_all_args == 2:
@@ -174,7 +174,7 @@ def scaled_dot_product_attention(*args, **kwargs):
         q = q.permute(0, 2, 1, 3); 
         k = k.permute(0, 2, 1, 3); 
         v = v.permute(0, 2, 1, 3)  # [N,H,L,C]
-        out = flash_attention_triton(q, k, v, causal=False).permute(0, 2, 1, 3)          # [N,L,H,C]
+        out = flash_attention_amd(q, k, v, causal=False).permute(0, 2, 1, 3)          # [N,L,H,C]
         
     else:
         raise ValueError(f"Unknown attention module: {config.BACKEND}")

@@ -1700,7 +1700,8 @@ class Trellis2ImageTo3DPipeline(Pipeline):
         else:
             out_mesh = self.decode_latent(shape_slat, None, res, use_tiled=use_tiled)
         torch.cuda.empty_cache()
-        pbar.update(1)              
+        if pbar is not None:
+            pbar.update(1)              
         if return_latent:
             if generate_texture_slat:
                 return out_mesh, (shape_slat, tex_slat, res)
@@ -2103,7 +2104,8 @@ class Trellis2ImageTo3DPipeline(Pipeline):
         else:
             out_mesh = self.decode_latent(shape_slat, None, res, use_tiled=use_tiled)
         torch.cuda.empty_cache()
-        pbar.update(1)              
+        if pbar is not None:
+            pbar.update(1)
 
         return out_mesh 
                        
